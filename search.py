@@ -60,7 +60,7 @@ def search(q, verbose=False):
         else:
             html = result.response.data.decode('utf-8')
             papers.append(extract_paper_data(result.url, html))
-            print(len(papers), '/', len(links))
+            if verbose: print(len(papers), '/', len(links))
 
     return papers
 
