@@ -65,33 +65,6 @@ def search(q, verbose=False):
     return papers
 
 
-    """
-    page = 0
-    urls_found = set()
-
-    if verbose: print('page', page)
-    url = "https://www.medrxiv.org/search/{} numresults%3A50%20sort%3Arelevance-rank?page={}"
-    url = url.format(quote_plus(q), page)
-    resp = requests.get(url)
-    soup = BeautifulSoup(resp.text, 'lxml')
-    links = soup.select('.pane-highwire-search-results .highwire-cite-linked-title')
-
-    for link in links:
-        paper_url = urljoin("https://www.medrxiv.org/", link.attrs['href'])
-
-        if paper_url in urls_found:
-            papers_already_found = True
-            break
-
-        urls_found.add(paper_url)
-
-    last_page = int(soup.select_one('.pager-last').text)
-
-    if verbose: print('papers', len(urls_found))
-
-    """
-
-
 if __name__ == '__main__':
     for paper in search('covid', verbose=True):
         print(paper)
