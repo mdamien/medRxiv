@@ -26,7 +26,7 @@ def extract_links(soup):
         yield urljoin("https://www.medrxiv.org/", link.attrs['href'])
 
 
-def search(q, verbose=False):
+def search(q, verbose=False, limit=None):
     results_per_page = 50
     base_url = "https://www.medrxiv.org/search/{} numresults%3A{}%20sort%3Arelevance-rank?page="
     base_url = base_url.format(q, results_per_page)
@@ -36,9 +36,15 @@ def search(q, verbose=False):
     soup = BeautifulSoup(resp.text, 'lxml')
     links = list(extract_links(soup))
 
-    if len(links) == results_per_page:
+    if len(links) == results_per_page and (limit is None or len(links) < limit):
         if verbose: print('fetching remaining pages')
         last_page = int(soup.select_one('.pager-last').text)
+
+        if limit is not None:
+            last_page = limit // results_per_page
+            if limit % results_per_page != 0:
+                last_page += 1
+
         pages_url = [base_url+str(page) for page in range(1, last_page)]
         for result in multithreaded_fetch(pages_url, domain_parallelism=20):
             if result.error is not None:
@@ -49,6 +55,9 @@ def search(q, verbose=False):
                 soup = BeautifulSoup(html, 'lxml')
                 links += extract_links(soup)
                 if verbose: print('links:', len(links))
+
+    if limit is not None:
+        links = links[:limit]
 
     # parallel fetch of all the papers
     if verbose: print('fetching papers')
